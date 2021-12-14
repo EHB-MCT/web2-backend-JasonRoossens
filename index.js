@@ -1,11 +1,11 @@
 const express = require('express');
-const fs = require('fs/promises');
 const bodyParser = require('body-parser');
 const {
-    MongoClient
+    MongoClient,
+    ObjectId
 } = require('mongodb');
-const config = require('./config.json');
 require('dotenv').config();
+const cors = require('cors');
 
 //Create the mongo client to use
 const client = new MongoClient(process.env.MONGO_URL);
