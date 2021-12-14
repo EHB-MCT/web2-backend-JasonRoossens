@@ -1,25 +1,21 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const {
-    MongoClient,
-    ObjectId
+    MongoClient
 } = require('mongodb');
+const config = require('./config.json');
 require('dotenv').config();
 const cors = require('cors');
-//encryption passwords
-const bcrypt = require('bcryptjs');
 
 //Create the mongo client to use
 const client = new MongoClient(process.env.MONGO_URL);
 
 const app = express();
-//Let heroku do its thing with the port
 const port = process.env.PORT || 1337;
 
 app.use(express.static('public'));
 app.use(bodyParser.json());
-// Floodgates OPEN!
-app.use(cors());
+app.use(cors())
 
 
 //Root route
@@ -27,19 +23,19 @@ app.get('/', (req, res) => {
     res.status(300).redirect('/info.html');
 });
 
-// DONE - Return all challenges from the database
+// Return all dogs from the database
 app.get('/dogs', async (req, res) => {
 
     try {
         //connect to the db
         await client.connect();
 
-        //retrieve the challenges collection data
+        //retrieve the dogs collection data
         const colli = client.db('courseProject').collection('dogs');
-        const chs = await colli.find({}).toArray();
+        const dgs = await colli.find({}).toArray();
 
         //Send back the data with the response
-        res.status(200).send(chs);
+        res.status(200).send(dgs);
     } catch (error) {
         console.log(error)
         res.status(500).send({
@@ -49,33 +45,31 @@ app.get('/dogs', async (req, res) => {
     } finally {
         await client.close();
     }
-
-
 });
 
-// DONE - challenges/:id
-app.get('/challenges/:id', async (req, res) => {
-    //id is located in the params: req.params.id
+// /dogs/:id
+app.get('/dogs:id', async (req, res) => {
+    //id is located in the query: req.query.id
     try {
-        //connect to the db    
+        //connect to the db
         await client.connect();
 
         //retrieve the boardgame collection data
-        const colli = client.db('groupproject').collection('challenges');
+        const colli = client.db('session5').collection('boardgames');
 
-        //only look for a challenge with this ID
+        //only look for a bg with this ID
         const query = {
-            _id: ObjectId(req.params.id)
+            bggid: req.query.id
         };
 
-        const challenge = await colli.findOne(query);
+        const bg = await colli.findOne(query);
 
-        if (challenge) {
+        if (bg) {
             //Send back the file
-            res.status(200).send(challenge);
+            res.status(200).send('ID OK' + req.params.id);
             return;
         } else {
-            res.status(400).send('Challenge could not be found with id: ' + req.params.id);
+            res.status(400).send('Boardgame could not be found with id: ' + req.query.id);
         }
 
     } catch (error) {
@@ -89,11 +83,12 @@ app.get('/challenges/:id', async (req, res) => {
     }
 });
 
-//DONE - save a challenge
-app.post('/challenges', async (req, res) => {
+// save a dog
+app.post('/dogs', async (req, res) => {
 
-    if (!req.body.name || !req.body.course || !req.body.points) {
-        res.status(400).send('Bad request: missing name, course or points');
+    if (!req.body.bggid || !req.body.name || !req.body.genre || !req.body.mechanisms ||
+        !req.body.description) {
+        res.status(400).send('Bad request: missing id, name, genre, mechanisms or description');
         return;
     }
 
@@ -101,34 +96,31 @@ app.post('/challenges', async (req, res) => {
         //connect to the db
         await client.connect();
 
-        //retrieve the challenges collection data
-        const colli = client.db('groupproject').collection('challenges');
+        //retrieve the boardgame collection data
+        const colli = client.db('session5').collection('boardgames');
 
-        // Validation for double challenges
+        // Validation for double boardgames
         const bg = await colli.findOne({
-            name: req.body.name,
-            course: req.body.course
+            bggid: req.body.bggid
         });
         if (bg) {
-            res.status(400).send(`Bad request: Challenge already exists with name ${req.body.name} for course ${req.body.course}`);
+            res.status(400).send('Bad request: boardgame already exists with bggid ' + req.body.bggid);
             return;
         }
-        // Create the new Challenge object
-        let newChallenge = {
+        // Create the new boardgame object
+        let newBoardgame = {
+            bggid: req.body.bggid,
             name: req.body.name,
-            course: req.body.course,
-            points: req.body.points,
-        }
-        // Add the optional session field
-        if (req.body.session) {
-            newChallenge.session = req.body.session;
+            genre: req.body.genre,
+            mechanisms: req.body.mechanisms,
+            description: req.body.description
         }
 
         // Insert into the database
-        let insertResult = await colli.insertOne(newChallenge);
+        let insertResult = await colli.insertOne(newBoardgame);
 
         //Send back successmessage
-        res.status(201).json(newChallenge);
+        res.status(201).send(`Boardgame succesfully saved with name ${req.body.name}`);
         return;
     } catch (error) {
         console.log(error);
@@ -141,148 +133,15 @@ app.post('/challenges', async (req, res) => {
     }
 });
 
-//DONE - update a challenge
-app.put('/challenges/:id', async (req, res) => {
-    //Check for body data
-    if (!req.body.name || !req.body.course || !req.body.points) {
-        res.status(400).send({
-            error: 'Bad Request',
-            value: 'Missing name, course or points property'
-        });
-        return;
-    }
-    // Check for id in url
-    if (!req.params.id) {
-        res.status(400).send({
-            error: 'Bad Request',
-            value: 'Missing id in url'
-        });
-        return;
-    }
-
-    try {
-        //connect to the db
-        await client.connect();
-
-        //retrieve the challenges collection data
-        const colli = client.db('groupproject').collection('challenges');
-
-        // Validation for existing challenge
-        const bg = await colli.findOne({
-            _id: ObjectId(req.params.id)
-        });
-        if (!bg) {
-            res.status(400).send({
-                error: 'Bad Request',
-                value: `Challenge does not exist with id ${req.params.id}`
-            });
-            return;
-        }
-        // Create the new Challenge object
-        let newChallenge = {
-            name: req.body.name,
-            course: req.body.course,
-            points: req.body.points,
-        }
-        // Add the optional session field
-        if (req.body.session) {
-            newChallenge.session = req.body.session;
-        }
-
-        // Insert into the database
-        let updateResult = await colli.updateOne({
-            _id: ObjectId(req.params.id)
-        }, {
-            $set: newChallenge
-        });
-
-        //Send back successmessage
-        res.status(201).json(updateResult);
-        return;
-    } catch (error) {
-        console.log(error);
-        res.status(500).send({
-            error: 'Something went wrong',
-            value: error
-        });
-    } finally {
-        await client.close();
-    }
+// update a dog
+app.put('/dogs', async (req, res) => {
+    res.send('UPDATE OK')
 });
 
-//delete a challenge
-app.delete('/challenges/:id', async (req, res) => {
-
-    if (!req.params.id) {
-        res.status(400).send({
-            error: 'Bad Request',
-            value: 'No id available in url'
-        });
-        return;
-    }
-
-    try {
-        //connect to the db
-        await client.connect();
-
-        //retrieve the challenges collection data
-        const colli = client.db('groupproject').collection('challenges');
-
-        // Validation for double challenges
-        let result = await colli.deleteOne({
-            _id: ObjectId(req.params.id)
-        });
-        //Send back successmessage
-        res.status(201).json(result);
-        return;
-    } catch (error) {
-        console.log(error);
-        res.status(500).send({
-            error: 'Something went wrong',
-            value: error
-        });
-    } finally {
-        await client.close();
-    }
+// delete a dog
+app.put('/dogs', async (req, res) => {
+    res.send('DELETE OK')
 });
-
-app.post('/users', async (req, res) => {
-
-
-    try {
-        //connect to the db
-        await client.connect();
-
-        //retrieve the challenges collection data
-        const colli = client.db('groupproject').collection('users');
-
-        let salt = bcrypt.genSaltSync(10);
-        var hash = bcrypt.hashSync(req.body.password, salt);
-
-        // Create the new Challenge object
-        let user = {
-            username: req.body.username,
-            password: hash
-        }
-
-        // Insert into the database
-        let insertResult = await colli.insertOne(user);
-
-        //Send back successmessage
-        res.status(201).json(insertResult);
-        return;
-    } catch (error) {
-        console.log(error);
-        res.status(500).send({
-            error: 'Something went wrong',
-            value: error
-        });
-    } finally {
-        await client.close();
-    }
-});
-
-
 
 app.listen(port, () => {
     console.log(`API is running at http://localhost:${port}`);
