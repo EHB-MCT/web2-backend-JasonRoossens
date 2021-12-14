@@ -54,7 +54,7 @@ app.get('/challenges/:id', async (req, res) => {
         await client.connect();
 
         //retrieve the boardgame collection data
-        const colli = client.db('session7').collection('challenges');
+        const colli = client.db('courseProject').collection('dogs');
 
         //only look for a challenge with this ID
         const query = {
@@ -95,7 +95,7 @@ app.post('/challenges', async (req, res) => {
         await client.connect();
 
         //retrieve the boardgame collection data
-        const colli = client.db('session7').collection('challenges');
+        const colli = client.db('courseProject').collection('dogs');
 
         // Validation for double challenges
         const bg = await colli.findOne({
@@ -157,7 +157,7 @@ app.put('/challenges/:id', async (req, res) => {
         await client.connect();
 
         //retrieve the challenges collection data
-        const colli = client.db('session7').collection('challenges');
+        const colli = client.db('courseProject').collection('dogs');
 
         // Validation for existing challenge
         const bg = await colli.findOne({
@@ -217,7 +217,7 @@ app.delete('/challenges/:id', async (req, res) => {
         await client.connect();
 
         //retrieve the boardgame collection data
-        const colli = client.db('session7').collection('challenges');
+        const colli = client.db('courseProject').collection('dogs');
 
         // Validation for double challenges
         const bg = await colli.deleteOne({
