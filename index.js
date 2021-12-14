@@ -5,9 +5,10 @@ const {
     MongoClient
 } = require('mongodb');
 const config = require('./config.json');
+require('dotenv').config();
 
 //Create the mongo client to use
-const client = new MongoClient(config.finalUrl);
+const client = new MongoClient(process.env.MONGO_URL);
 
 const app = express();
 const port = 1337;
@@ -28,12 +29,12 @@ app.get('/dogs', async (req, res) => {
         //connect to the db
         await client.connect();
 
-        //retrieve the boardgame collection data
-        const colli = client.db('session5').collection('boardgames');
-        const bgs = await colli.find({}).toArray();
+        //retrieve the dogs collection data
+        const colli = client.db('courseProject').collection('dogs');
+        const dgs = await colli.find({}).toArray();
 
         //Send back the data with the response
-        res.status(200).send("OK");
+        res.status(200).send(dgs);
     } catch (error) {
         console.log(error)
         res.status(500).send({
