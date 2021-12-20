@@ -132,10 +132,10 @@ app.post('/dogs', async (req, res) => {
 //Update dog
 app.put('/dogs/:id', async (req, res) => {
     //Check for body data
-    if (!req.body.name || !req.body.course || !req.body.points) {
+    if (!req.body.name || !req.body.generation || !req.body.breed) {
         res.status(400).send({
             error: 'Bad Request',
-            value: 'Missing name, course or points property'
+            value: 'Missing name, generation or breed property'
         });
         return;
     }
@@ -169,13 +169,10 @@ app.put('/dogs/:id', async (req, res) => {
         // Create the new Dog object
         let newDog = {
             name: req.body.name,
-            course: req.body.course,
-            points: req.body.points,
+            course: req.body.generation,
+            points: req.body.breed,
         }
-        // Add the optional session field
-        if (req.body.session) {
-            newDog.session = req.body.session;
-        }
+
 
         // Insert into the database
         let updateResult = await colli.updateOne({
