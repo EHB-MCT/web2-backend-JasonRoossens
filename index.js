@@ -85,8 +85,8 @@ app.get('/dogs/:id', async (req, res) => {
 // DONE save Dogs
 app.post('/dogs', async (req, res) => {
 
-    if (!req.body.name || !req.body.course || !req.body.points) {
-        res.status(400).send('Bad request: missing name, course, or points');
+    if (!req.body.name || !req.body.generation || !req.body.breed) {
+        res.status(400).send('Bad request: missing name, generation, or breed');
         return;
     }
 
@@ -100,21 +100,17 @@ app.post('/dogs', async (req, res) => {
         // Validation for double dogs
         const bg = await colli.findOne({
             name: req.body.name,
-            course: req.body.course
+            breed: req.body.breed
         });
         if (bg) {
-            res.status(400).send(`Bad request: Dog already exists with name ${req.body.name} for course ${req.body.course}`);
+            res.status(400).send(`Bad request: Dog already exists with name ${req.body.name} with breed ${req.body.breed}`);
             return;
         }
         // Create the new Dog object
         let newDog = {
             name: req.body.name,
-            course: req.body.course,
-            points: req.body.points
-        }
-        //Add optional session field
-        if (req.body.session) {
-            newDog.session = req.body.session;
+            generation: req.body.generation,
+            breed: req.body.breed
         }
         // Insert into the database
         let insertResult = await colli.insertOne(newDog);
