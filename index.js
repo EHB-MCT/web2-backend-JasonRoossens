@@ -22,14 +22,14 @@ app.get('/', (req, res) => {
     res.status(300).redirect('/info.html');
 });
 
-// DONE Return all challenges from the database
+// DONE Return all dogs from the database
 app.get('/dogs', async (req, res) => {
 
     try {
         //connect to the db
         await client.connect();
 
-        //retrieve the challenges collection data
+        //retrieve the dogs collection data
         const colli = client.db('courseProject').collection('dogs');
         const chs = await colli.find({}).toArray();
 
@@ -46,8 +46,8 @@ app.get('/dogs', async (req, res) => {
     }
 });
 
-// DONE /challenges/:id
-app.get('/challenges/:id', async (req, res) => {
+// DONE /dogs/:id
+app.get('/dogs/:id', async (req, res) => {
     //id is located in the query: req.params.id
     try {
         //connect to the db
@@ -56,19 +56,19 @@ app.get('/challenges/:id', async (req, res) => {
         //retrieve the boardgame collection data
         const colli = client.db('courseProject').collection('dogs');
 
-        //only look for a challenge with this ID
+        //only look for a dog with this ID
         const query = {
             _id: ObjectId(req.params.id)
         };
 
-        const challenge = await colli.findOne(query);
+        const dog = await colli.findOne(query);
 
-        if (challenge) {
+        if (dog) {
             //Send back the file
-            res.status(200).send(challenge);
+            res.status(200).send(dog);
             return;
         } else {
-            res.status(400).send('Challenge could not be found with id: ' + req.params.id);
+            res.status(400).send('Dog could not be found with id: ' + req.params.id);
         }
 
     } catch (error) {
@@ -82,8 +82,8 @@ app.get('/challenges/:id', async (req, res) => {
     }
 });
 
-// DONE save challenges
-app.post('/challenges', async (req, res) => {
+// DONE save Dogs
+app.post('/dogs', async (req, res) => {
 
     if (!req.body.name || !req.body.course || !req.body.points) {
         res.status(400).send('Bad request: missing name, course, or points');
@@ -97,30 +97,30 @@ app.post('/challenges', async (req, res) => {
         //retrieve the boardgame collection data
         const colli = client.db('courseProject').collection('dogs');
 
-        // Validation for double challenges
+        // Validation for double dogs
         const bg = await colli.findOne({
             name: req.body.name,
             course: req.body.course
         });
         if (bg) {
-            res.status(400).send(`Bad request: Challenge already exists with name ${req.body.name} for course ${req.body.course}`);
+            res.status(400).send(`Bad request: Dog already exists with name ${req.body.name} for course ${req.body.course}`);
             return;
         }
-        // Create the new Challenge object
-        let newChallenge = {
+        // Create the new Dog object
+        let newDog = {
             name: req.body.name,
             course: req.body.course,
             points: req.body.points
         }
         //Add optional session field
         if (req.body.session) {
-            newChallenge.session = req.body.session;
+            newDog.session = req.body.session;
         }
         // Insert into the database
-        let insertResult = await colli.insertOne(newChallenge);
+        let insertResult = await colli.insertOne(newDog);
 
         //Send back successmessage
-        res.status(201).json(newChallenge);
+        res.status(201).json(newDog);
         return;
     } catch (error) {
         console.log(error);
@@ -133,8 +133,8 @@ app.post('/challenges', async (req, res) => {
     }
 });
 
-//Update challenge
-app.put('/challenges/:id', async (req, res) => {
+//Update dog
+app.put('/dogs/:id', async (req, res) => {
     //Check for body data
     if (!req.body.name || !req.body.course || !req.body.points) {
         res.status(400).send({
@@ -156,36 +156,36 @@ app.put('/challenges/:id', async (req, res) => {
         //connect to the db
         await client.connect();
 
-        //retrieve the challenges collection data
+        //retrieve the dogs collection data
         const colli = client.db('courseProject').collection('dogs');
 
-        // Validation for existing challenge
+        // Validation for existing dog
         const bg = await colli.findOne({
             _id: ObjectId(req.params.id)
         });
         if (!bg) {
             res.status(400).send({
                 error: 'Bad Request',
-                value: `Challenge does not exist with id ${req.params.id}`
+                value: `Dog does not exist with id ${req.params.id}`
             });
             return;
         }
-        // Create the new Challenge object
-        let newChallenge = {
+        // Create the new Dog object
+        let newDog = {
             name: req.body.name,
             course: req.body.course,
             points: req.body.points,
         }
         // Add the optional session field
         if (req.body.session) {
-            newChallenge.session = req.body.session;
+            newDog.session = req.body.session;
         }
 
         // Insert into the database
         let updateResult = await colli.updateOne({
             _id: ObjectId(req.params.id)
         }, {
-            $set: newChallenge
+            $set: newDog
         });
 
         //Send back successmessage
@@ -202,8 +202,8 @@ app.put('/challenges/:id', async (req, res) => {
     }
 });
 
-// delete challenge
-app.delete('/challenges/:id', async (req, res) => {
+// delete dog
+app.delete('/dogs/:id', async (req, res) => {
     if (!req.params.id) {
         res.status(400).send({
             error: 'Bad Request',
@@ -219,7 +219,7 @@ app.delete('/challenges/:id', async (req, res) => {
         //retrieve the boardgame collection data
         const colli = client.db('courseProject').collection('dogs');
 
-        // Validation for double challenges
+        // Validation for double dogs
         const bg = await colli.deleteOne({
             _id: ObjectId(req.params.id)
         });
