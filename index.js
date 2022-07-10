@@ -210,8 +210,76 @@ app.put('/dogs/:id', async (req, res) => {
 
 // delete a dog
 app.delete('/dogs/:id', async (req, res) => {
-    res.send('DELETE OK');
+
+    if (!req.params.id) {
+        res.status(400).send({
+            error: 'Bad Request',
+            value: 'No id available in url'
+        });
+        return;
+    }
+
+    try {
+        //connect to the db
+        await client.connect();
+
+        //retrieve the dogs collection data
+        const colli = client.db('courseProject').collection('dogs');
+
+        // Validation for double dogs
+        let result = await colli.deleteOne({
+            _id: ObjectId(req.params.id)
+        });
+        //Send back successmessage
+        res.status(201).json(result);
+        return;
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+            error: 'Something went wrong',
+            value: error
+        });
+    } finally {
+        await client.close();
+    }
 });
+
+/* app.post('/users', async (req, res) => {
+
+
+    try {
+        //connect to the db
+        await client.connect();
+
+        //retrieve the challenges collection data
+        const colli = client.db('groupproject').collection('users');
+
+        let salt = bcrypt.genSaltSync(10);
+        var hash = bcrypt.hashSync(req.body.password, salt);
+
+        // Create the new Challenge object
+        let user = {
+            username: req.body.username,
+            password: hash
+        }
+
+        // Insert into the database
+        let insertResult = await colli.insertOne(user);
+
+        //Send back successmessage
+        res.status(201).json(insertResult);
+        return;
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+            error: 'Something went wrong',
+            value: error
+        });
+    } finally {
+        await client.close();
+    }
+}); */
+
 
 app.listen(port, () => {
     console.log(`API is running at http://localhost:${port}`);
