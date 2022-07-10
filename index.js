@@ -178,8 +178,8 @@ app.put('/dogs/:id', async (req, res) => {
         // Create the new Challenge object
         let newDog = {
             name: req.body.name,
-            course: req.body.generation,
-            points: req.body.breed,
+            generation: req.body.generation,
+            breed: req.body.breed,
         }
 
         /* // Add optional description field
