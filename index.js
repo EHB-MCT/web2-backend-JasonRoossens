@@ -1,7 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const {
-    MongoClient
+    MongoClient,
+    ObjectId
 } = require('mongodb');
 require('dotenv').config();
 
@@ -57,7 +58,7 @@ app.get('/dogs/:id', async (req, res) => {
 
         //only look for a dog with this ID
         const query = {
-            _id: req.params.id
+            _id: ObjectId(req.params.id)
         };
 
         const dog = await colli.findOne(query);
