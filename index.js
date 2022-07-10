@@ -106,7 +106,7 @@ app.post('/dogs', async (req, res) => {
 
         });
         if (bg) {
-            res.status(400).send(`Bad request: dog already exists with name ${req.body.name} generation ${req.body.generation} and breed ${req.body.breed}`);
+            res.status(400).send(`Bad request: A dog with name ${req.body.name}, generation ${req.body.generation} and breed ${req.body.breed} already exists!`);
             return;
         }
         // Create the new Dog object
