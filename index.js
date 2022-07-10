@@ -85,51 +85,57 @@ app.get('/dogs/:id', async (req, res) => {
 // save a dog
 app.post('/dogs', async (req, res) => {
 
-    //  if (!req.body.bggid || !req.body.name || !req.body.genre || !req.body.mechanisms ||
-    //      !req.body.description) {
-    //      res.status(400).send('Bad request: missing id, name, genre, mechanisms or description');
-    //      return;
-    //  }
+    if (!req.body.name || !req.body.breed || !req.body.generation) {
+        res.status(400).send('Bad request: missing name, breed or generation');
+        return;
+    }
 
-    //  try {
-    //      //connect to the db
-    //      await client.connect();
+    try {
+        //connect to the db
+        await client.connect();
 
-    //      //retrieve the boardgame collection data
-    //      const colli = client.db('session5').collection('boardgames');
+        //retrieve the dogs collection data
+        const colli = client.db('courseProject').collection('dogs');
 
-    //      // Validation for double boardgames
-    //      const bg = await colli.findOne({
-    //          bggid: req.body.bggid
-    //      });
-    //      if (bg) {
-    //          res.status(400).send('Bad request: boardgame already exists with bggid ' + req.body.bggid);
-    //          return;
-    //      }
-    //      // Create the new boardgame object
-    //      let newBoardgame = {
-    //          bggid: req.body.bggid,
-    //          name: req.body.name,
-    //          genre: req.body.genre,
-    //          mechanisms: req.body.mechanisms,
-    //          description: req.body.description
-    //      }
 
-    //      // Insert into the database
-    //      let insertResult = await colli.insertOne(newBoardgame);
+        // Validation for double dogs
+        const bg = await colli.findOne({
+            name: req.body.name,
+            generation: req.body.generation,
+            breed: req.body.breed
 
-    //      //Send back successmessage
-    res.status(201).send(`dog succesfully saved with name ${req.body.name}`);
-    //      return;
-    //  } catch (error) {
-    //      console.log(error);
-    //      res.status(500).send({
-    //          error: 'Something went wrong',
-    //          value: error
-    //      });
-    //  } finally {
-    //      await client.close();
-    //  }
+        });
+        if (bg) {
+            res.status(400).send(`Bad request: dog already exists with name ${req.body.name} generation ${req.body.generation} and breed ${req.body.breed}`);
+            return;
+        }
+        // Create the new Dog object
+        let newDog = {
+            name: req.body.name,
+            generation: req.body.generation,
+            breed: req.body.breed
+        }
+
+        /* // Add optional description field
+        if (req.body.description) {
+            newDog.description = req.body.description;
+        } */
+
+        // Insert into the database
+        let insertResult = await colli.insertOne(newDog);
+
+        //Send back successmessage
+        res.status(201).json(newDog);
+        return;
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+            error: 'Something went wrong',
+            value: error
+        });
+    } finally {
+        await client.close();
+    }
 });
 
 // update a dog
