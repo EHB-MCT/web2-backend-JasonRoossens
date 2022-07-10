@@ -138,7 +138,7 @@ app.post('/dogs', async (req, res) => {
     }
 });
 
-// update a dog
+// update a dog - DONE
 app.put('/dogs/:id', async (req, res) => {
     //Check for body data
     if (!req.body.name || !req.body.generation || !req.body.breed) {
@@ -161,21 +161,21 @@ app.put('/dogs/:id', async (req, res) => {
         //connect to the db
         await client.connect();
 
-        //retrieve the challenges collection data
+        //retrieve the dogs collection data
         const colli = client.db('courseProject').collection('dogs');
 
-        // Validation for existing challenge
+        // Validation for existing dog
         const bg = await colli.findOne({
             _id: ObjectId(req.params.id)
         });
         if (!bg) {
             res.status(400).send({
                 error: 'Bad Request',
-                value: `Dog does not exist with id ${req.params.id}`
+                value: `Dog with id ${req.params.id}does not exist`
             });
             return;
         }
-        // Create the new Challenge object
+        // Create the new Dog object
         let newDog = {
             name: req.body.name,
             generation: req.body.generation,
