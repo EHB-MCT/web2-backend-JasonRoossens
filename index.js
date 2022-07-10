@@ -208,7 +208,7 @@ app.put('/dogs/:id', async (req, res) => {
     }
 });
 
-// delete a dog
+// delete a dog - DONE
 app.delete('/dogs/:id', async (req, res) => {
 
     if (!req.params.id) {
