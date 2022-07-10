@@ -46,7 +46,7 @@ app.get('/dogs', async (req, res) => {
     }
 });
 
-// /dogs/:id
+// dogs/:id - DONE
 app.get('/dogs/:id', async (req, res) => {
     //id is located in the query: req.params.id
     try {
