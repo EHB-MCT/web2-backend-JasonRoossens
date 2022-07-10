@@ -82,7 +82,7 @@ app.get('/dogs/:id', async (req, res) => {
     }
 });
 
-// save a dog
+// save a dog - DONE
 app.post('/dogs', async (req, res) => {
 
     if (!req.body.name || !req.body.breed || !req.body.generation) {
@@ -140,7 +140,72 @@ app.post('/dogs', async (req, res) => {
 
 // update a dog
 app.put('/dogs/:id', async (req, res) => {
-    res.send('UPDATE OK');
+    //Check for body data
+    if (!req.body.name || !req.body.generation || !req.body.breed) {
+        res.status(400).send({
+            error: 'Bad Request',
+            value: 'Missing name, generation or breed property'
+        });
+        return;
+    }
+    // Check for id in url
+    if (!req.params.id) {
+        res.status(400).send({
+            error: 'Bad Request',
+            value: 'Missing id in url'
+        });
+        return;
+    }
+
+    try {
+        //connect to the db
+        await client.connect();
+
+        //retrieve the challenges collection data
+        const colli = client.db('courseProject').collection('dogs');
+
+        // Validation for existing challenge
+        const bg = await colli.findOne({
+            _id: ObjectId(req.params.id)
+        });
+        if (!bg) {
+            res.status(400).send({
+                error: 'Bad Request',
+                value: `Dog does not exist with id ${req.params.id}`
+            });
+            return;
+        }
+        // Create the new Challenge object
+        let newDog = {
+            name: req.body.name,
+            course: req.body.generation,
+            points: req.body.breed,
+        }
+
+        /* // Add optional description field
+        if (req.body.description) {
+            newDog.description = req.body.description;
+        } */
+
+        // Insert into the database
+        let updateResult = await colli.updateOne({
+            _id: ObjectId(req.params.id)
+        }, {
+            $set: newDog
+        });
+
+        //Send back successmessage
+        res.status(201).json(updateResult);
+        return;
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+            error: 'Something went wrong',
+            value: error
+        });
+    } finally {
+        await client.close();
+    }
 });
 
 // delete a dog
