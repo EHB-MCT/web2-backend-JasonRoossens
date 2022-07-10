@@ -21,7 +21,7 @@ app.get('/', (req, res) => {
     res.status(300).redirect('/info.html');
 });
 
-// Return all dogs from the database
+// Return all dogs from the database - DONE 
 app.get('/dogs', async (req, res) => {
 
     try {
@@ -47,38 +47,38 @@ app.get('/dogs', async (req, res) => {
 
 // /dogs/:id
 app.get('/dogs/:id', async (req, res) => {
-    // //id is located in the query: req.query.id
-    // try {
-    //     //connect to the db
-    //     await client.connect();
+    //id is located in the query: req.params.id
+    try {
+        //     //connect to the db
+        await client.connect();
 
-    //     //retrieve the boardgame collection data
-    //     const colli = client.db('session5').collection('boardgames');
+        //retrieve the dogs collection data
+        const colli = client.db('courseProject').collection('dogs');
 
-    //     //only look for a bg with this ID
-    //     const query = {
-    //         bggid: req.query.id
-    //     };
+        //only look for a dog with this ID
+        const query = {
+            _id: req.params.id
+        };
 
-    //     const bg = await colli.findOne(query);
+        const dog = await colli.findOne(query);
 
-    //     if (bg) {
-    //         //Send back the file
-    res.status(200).send('ID OK' + req.params.id);
-    //         return;
-    //     } else {
-    //         res.status(400).send('Boardgame could not be found with id: ' + req.query.id);
-    //     }
+        if (dog) {
+            //Send back the file
+            res.status(200).send(dog);
+            return;
+        } else {
+            res.status(400).send('Dog could not be found with id: ' + req.params.id);
+        }
 
-    // } catch (error) {
-    //     console.log(error);
-    //     res.status(500).send({
-    //         error: 'Something went wrong',
-    //         value: error
-    //     });
-    // } finally {
-    //     await client.close();
-    // }
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+            error: 'Something went wrong',
+            value: error
+        });
+    } finally {
+        await client.close();
+    }
 });
 
 // save a dog
