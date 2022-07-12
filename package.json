@@ -1,7 +1,7 @@
 {
   "name": "web2-backend-jasonroossens",
   "version": "1.0.0",
-  "description": "",
+  "description": "Course project for web II, full stack website Adogtion. Platform to pick up abdoned dogs.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -11,8 +11,12 @@
     "type": "git",
     "url": "git+https://github.com/EHB-MCT/web2-backend-JasonRoossens.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "backend",
+    "dogs",
+    "adobtion"
+  ],
+  "author": "Jason Roossens",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/EHB-MCT/web2-backend-JasonRoossens/issues"
@@ -20,8 +24,10 @@
   "homepage": "https://github.com/EHB-MCT/web2-backend-JasonRoossens#readme",
   "dependencies": {
     "body-parser": "^1.20.0",
+    "cors": "^2.8.5",
     "dotenv": "^16.0.1",
     "express": "^4.18.1",
-    "mongodb": "^4.7.0"
+    "mongodb": "^4.7.0",
+    "nodemon": "^2.0.19"
   }
 }
